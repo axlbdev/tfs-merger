@@ -230,12 +230,14 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\IQuestionary.cs" />
     <Compile Include="Vcs\IChangeset.cs" />
+    <Compile Include="Vcs\IVcsMergeCandidate.cs" />
     <Compile Include="Vcs\IMerger.cs" />
     <Compile Include="Vcs\IVcsContext.cs" />
     <Compile Include="Vcs\MergeCandidate.cs" />
     <Compile Include="Vcs\PushFailureException.cs" />
     <Compile Include="Vcs\Tfs\TfsVcsChangeset.cs" />
     <Compile Include="Vcs\Tfs\TfsVcsContext.cs" />
+    <Compile Include="Vcs\Tfs\TfsVcsMergeCandidate.cs" />
     <Compile Include="Vcs\Tfs\TfsVcsMerger.cs" />
     <Compile Include="Vcs\UnresolvedConflictException.cs" />
   </ItemGroup>

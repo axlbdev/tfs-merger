@@ -15,8 +15,11 @@ namespace TfsMerger
             int i = 0;
             for (i = 0; i < 3; i++)
             {
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine(addInfo);
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Conflict cannot be automatically resolved, resolve it manually and enter 'continue'");
+                Console.ResetColor();
                 var answ = Console.ReadLine();
                 if (answ != "continue")
                 {

@@ -29,6 +29,7 @@ namespace TfsMerger
 
         public void Merge(string[] cs, string mergeIssue, IDictionary<string, string> directions, Regex[] acceptTheirs, Regex[] acceptYours, string[] bubblePath)
         {
+            Logger.Info("Obtaining changesets");
             var changesets = merger.GetCandidates(context, directions)
                 .Where(x => cs.Contains(x.Changeset.Id))
                 .OrderBy(x => x.Changeset.CreationDate);
@@ -36,15 +37,15 @@ namespace TfsMerger
             Action<IEnumerable<TfsMerger.Core.Vcs.MergeCandidate>> merge = (chs) =>
             {
                 var startFromPath = chs.First().Source;
-                var changesetsToMerge = new List<string>(chs.Select(x => x.Changeset.Id));
+                var changesetsToMerge = new List<IChangeset>(chs.Select(x => x.Changeset));
 
-                Logger.Info("Merging batch {0} -> {1}: {2}", chs.First().Source, chs.First().Destination, String.Join(",", changesetsToMerge));
+                Logger.Info("Merging batch {0} -> {1}: {2}", chs.First().Source, chs.First().Destination, String.Join(",", changesetsToMerge.Select(x=>x.Id)));
                 
                 var startFromIdx = bubblePath.Select((x, i) => new { x, i }).Where(x => x.x == startFromPath).Select(x => x.i).FirstOrDefault();
                 for (var i = startFromIdx; i < bubblePath.Length - 1; i++)
                 {
-                    string[] merged = null;
-                    Logger.Debug("Merging changesets {0} -> {1}: {2}", bubblePath[i], bubblePath[i + 1], String.Join(",", changesetsToMerge));
+                    IChangeset[] merged = null;
+                    Logger.Debug("Merging changesets {0} -> {1}: {2}", bubblePath[i], bubblePath[i + 1], String.Join(",", changesetsToMerge.Select(x => x.Id)));
                     if (MergeChangesets(context, merger, bubblePath[i], bubblePath[i + 1], changesetsToMerge.ToArray(), acceptTheirs, null, mergeIssue, out merged))
                     {
                         if (merged != null && merged.Length > 0)
@@ -59,7 +60,7 @@ namespace TfsMerger
                     }
                 }
             };
-
+            Logger.Info("Processing changesets");
 
             string lastSource = null, lastDest = null;
             var batch = new List<TfsMerger.Core.Vcs.MergeCandidate>();
@@ -77,6 +78,10 @@ namespace TfsMerger
                 batch.Add(mergeCandidate);
                 lastSource = mergeCandidate.Source;
                 lastDest = mergeCandidate.Destination;
+            }
+            if(batch.Any())
+            {
+                merge(batch);
             }
         }
 
@@ -97,7 +102,24 @@ namespace TfsMerger
             foreach (var changeset in history)
             {
                 var cn = merger.MergeChangeset(ctx, src, dst, changeset, accepthTheirs, acceptYours, cq, mergeWi);
+                result.Add(cn.Id);
+            }
+            mergeChangesets = result.ToArray();
+            return true;
+        }
+        private static bool MergeChangesets(IVcsContext ctx, IMerger merger, string src, string dst, IChangeset[] changesets, Regex[] accepthTheirs, Regex[] acceptYours, string mergeWi, out IChangeset[] mergeChangesets)
+        {
+            var result = new List<IChangeset>();
+            mergeChangesets = null;
 
+
+
+            Logger.Info("Merging {0} changesets", changesets.Count());
+            var cq = new ConsoleQuestionary();
+
+            foreach (var changeset in changesets)
+            {
+                var cn = merger.MergeChangeset(ctx, src, dst, changeset, accepthTheirs, acceptYours, cq, mergeWi);
                 result.Add(cn);
             }
             mergeChangesets = result.ToArray();

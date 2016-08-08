@@ -35,5 +35,15 @@ namespace TfsMerger.Core.Vcs.Tfs
         {
             get { return Changeset.Comment; }
         }
+
+        public static explicit operator TfsVcsChangeset(Changeset c)
+        {
+            return new TfsVcsChangeset(c);
+        }
+
+        public static explicit operator Changeset(TfsVcsChangeset c)
+        {
+            return c.Changeset;
+        }
     }
 }

@@ -36,13 +36,13 @@ namespace TfsMerger.Core.Vcs.Tfs
             foreach (var direction in directions)
             {
                 overallHistory.AddRange(ctx.VCS.GetMergeCandidates(direction.Key, direction.Value, RecursionType.Full)
-                    .Select(x => new MergeCandidate { Changeset = new TfsVcsChangeset(x.Changeset), Source = direction.Key, Destination = direction.Value }));
+                    .Select(x => new MergeCandidate { Candidate = (TfsVcsMergeCandidate)x, Changeset = new TfsVcsChangeset(x.Changeset), Source = direction.Key, Destination = direction.Value }));
             }
             return overallHistory;
         }
 
 
-        public string MergeChangeset(IVcsContext context, string src, string dst, IChangeset changeset, Regex[] acceptTheirs, Regex[] acceptYours, IQuestionary questionary, string mergeIssue = null)
+        public IChangeset MergeChangeset(IVcsContext context, string src, string dst, IChangeset changeset, Regex[] acceptTheirs, Regex[] acceptYours, IQuestionary questionary, string mergeIssue = null)
         {
             var ctx = (TfsVcsContext)context;
 
@@ -72,7 +72,8 @@ namespace TfsMerger.Core.Vcs.Tfs
                         Logger.Trace("Conflict on {0} autoresolved with AcceptTheirs", conflict.FileName);
                         conflict.Resolution = Resolution.AcceptTheirs;
                         ctx.Workspace.ResolveConflict(conflict);
-                    } else if (acceptYours != null && acceptYours.Any(x=>x.IsMatch(conflict.FileName)))
+                    }
+                    else if (acceptYours != null && acceptYours.Any(x => x.IsMatch(conflict.FileName)))
                     {
                         Logger.Trace("Conflict on {0} autoresolved with AcceptYours", conflict.FileName);
                         conflict.Resolution = Resolution.AcceptYours;
@@ -132,7 +133,7 @@ namespace TfsMerger.Core.Vcs.Tfs
                 {
                     throw new PushFailureException(String.Format("Check-in failed with {0}, exiting", ex.ToString()));
                 }
-                return cn.ToString();
+                return (TfsVcsChangeset)ctx.VCS.GetChangeset(cn);
             }
             return null;
         }

@@ -11,6 +11,6 @@ namespace TfsMerger.Core.Vcs
     public interface IMerger
     {
         IEnumerable<MergeCandidate> GetCandidates(IVcsContext context, IDictionary<string, string> directions);
-        string MergeChangeset(IVcsContext context, string src, string dst, IChangeset changeset, Regex[] acceptTheirs, Regex[] acceptYours, IQuestionary questionary, string mergeIssue = null);
+        IChangeset MergeChangeset(IVcsContext context, string src, string dst, IChangeset changeset, Regex[] acceptTheirs, Regex[] acceptYours, IQuestionary questionary, string mergeIssue = null);
     }
 }

@@ -51,6 +51,7 @@ namespace TfsMerger
             {
                 if (invokedVerb == "dump")
                 {
+                    Console.WriteLine("Dumping");
                     var directions = cfg.MergeDirections
                         .Select(x => new { Src = cfg.GetBranch(x.Key), Dst = cfg.GetBranch(x.Value) })
                         .ToDictionary(x => x.Src, x => x.Dst);
@@ -58,6 +59,7 @@ namespace TfsMerger
                 }
                 if (invokedVerb == "merge")
                 {
+                    Console.WriteLine("Merging");
                     var directions = cfg.MergeDirections
                         .Select(x => new { Src = cfg.GetBranch(x.Key), Dst = cfg.GetBranch(x.Value) })
                         .ToDictionary(x => x.Src, x => x.Dst);
@@ -73,14 +75,18 @@ namespace TfsMerger
                         cfg.AutoResolve.AcceptYours == null
                             ? null
                             : cfg.AutoResolve.AcceptYours.Select(x => new Regex(x)).ToArray(),
-                        cfg.BubblePath);
+                        cfg.BubblePath.Select(x=>cfg.GetBranch(x)).ToArray());
                 }
             } catch(Exception ex)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(ex.ToString());
+                Console.ResetColor();
                 return 1;
             }
-
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("All done");
+            Console.ResetColor();
             return 0;
         }
     }
